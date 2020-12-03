@@ -1,0 +1,74 @@
+jupyter-lab - Rodar o Jupyter
+
+
+==== Importar Libraries ====
+
+import itertools
+import pandas as pd
+import numpy as np
+from sklearn.linear_model import PassiveAggressiveClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix 
+
+==== Importar DataSeT ====
+
+df=pd.read_csv(r'C:\Users\MATHEUSHENRIQUEDESOU\PycharmProjects\fakeNews\dataset\fakenews.csv')   - Pega o local do dataset que vai ser usado
+df=pd.read_csv(r'C:\Users\MATHEUSHENRIQUEDESOU\PycharmProjects\fakeNews\dataset\fakenews2.csv')
+
+df.shape  - Mostra o tamanho do arquivo -ROWS-
+
+==== Mostra Cabeçalho ====
+
+df.head() - Mostra 5 Primeiros ROWS
+
+==== Isola o label ====
+
+labels = df.label
+labels.head()
+
+
+==== Faz o 1 e 0 virar FAKE e REAL ====
+
+df.loc[(df['label'] == 1) , ['label']] = 'FAKE'
+df.loc[(df['label'] == 0) , ['label']] = 'REAL'
+
+=== Separaçao ===   80% do data set vira treino e 20% vira testes continuos.
+
+
+x_train,x_test,y_train,y_test=train_test_split(df['text'].values.astype('str'), labels, test_size=0.2, random_state=7)
+
+
+=== Vetorizador === Faz o vetorizador usar o dicionario em ingles para os testes das palavras
+
+tfidf_vectorizer=TfidfVectorizer(stop_words='english', max_df=0.7)
+
+
+Com o vetorizador criado a gente transforma ele no local de teste
+
+tfidf_train=tfidf_vectorizer.fit_transform(x_train) 
+tfidf_test=tfidf_vectorizer.transform(x_test)
+
+
+===Passivo Agressivo=== a outra parte separada do treino é usada no passivo agressivo
+pa_classifier=PassiveAggressiveClassifier(max_iter=50)
+pa_classifier.fit(tfidf_train,y_train)
+
+
+Usa o vetorizador para ver se o artigo visto é confiavel ou nao. % de confiança
+
+y_pred=pa_classifier.predict(tfidf_test)
+score=accuracy_score(y_test,y_pred)
+print(f'Accuracy: {round(score*100,2)}%')
+
+
+Usa o confusion matrix, que confunde a IA para ver a media de tudo
+confusion_matrix(y_test,y_pred, labels=['FAKE','REAL'])
+
+
+
+
+
+
+
